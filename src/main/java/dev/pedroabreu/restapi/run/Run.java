@@ -1,25 +1,35 @@
 package dev.pedroabreu.restapi.run;
 
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Positive;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 public record Run(
         Integer id,
-        // Anotação que valida se a string não é nula e não está vazia
         @NotEmpty
         String title,
-        LocalDateTime start,
-        LocalDateTime end,
+        LocalDateTime startedOn,
+        LocalDateTime completedOn,
         @Positive
-        Integer kilometers,
+        Integer miles,
         Location location
 ) {
 
     public Run {
-        if(!end.isAfter(start)) {
-            throw new IllegalArgumentException("A data de término deve ser após a data de início");
+        if (!completedOn.isAfter(startedOn)) {
+            throw new IllegalArgumentException("Completed On must be after Started On");
         }
     }
+
+    public Duration getDuration() {
+        return Duration.between(startedOn,completedOn);
+    }
+
+    public Integer getAvgPace() {
+        return Math.toIntExact(getDuration().toMinutes() / miles);
+    }
+
 }

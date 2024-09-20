@@ -9,48 +9,48 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-// Seta o caminho base para o controlador
 @RequestMapping("/api/runs")
-public class RunController {
+class RunController {
 
-    private final RunRepository repository;
+    private final JdbcRunRepository runRepository;
 
-    public RunController(RunRepository repository) {
-        this.repository = repository;
+    RunController(JdbcRunRepository runRepository) {
+        this.runRepository = runRepository;
     }
 
-    @GetMapping("")
+    @GetMapping
     List<Run> findAll() {
-        return repository.getRuns();
+        return runRepository.findAll();
     }
 
     @GetMapping("/{id}")
     Run findById(@PathVariable Integer id) {
-
-        Optional<Run> run = repository.findById(id);
-
-        if (run.isEmpty()) {
-            throw new RunNotFoundException();
+        Optional<Run> run = runRepository.findById(id);
+        if(run.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Run not found.");
         }
-
         return run.get();
     }
 
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping("")
+    @PostMapping
     void create(@Valid @RequestBody Run run) {
-        repository.addRun(run);
+        runRepository.create(run);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PutMapping("")
-    void update(@RequestBody Run run) {
-        repository.updateRun(run);
+    @PutMapping("/{id}")
+    void update(@Valid @RequestBody Run run, @PathVariable Integer id) {
+        runRepository.update(run,id);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
     void delete(@PathVariable Integer id) {
-        repository.deleteRun(id);
+        runRepository.delete(id);
+    }
+
+    List<Run> findByLocation(@RequestParam String location) {
+        return runRepository.findByLocation(location);
     }
 }
